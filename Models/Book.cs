@@ -17,7 +17,7 @@ namespace BookStore.Models
         public string Description { get; set; }
 
         /// <summary> Mo
-        /// Navigation property for declare the relationship between 2 classes
+        /// Navigation property for declare the relationship between 2 classes  ( use Include to return )
         /// </summary>
         public Author Author { get; set; }
 

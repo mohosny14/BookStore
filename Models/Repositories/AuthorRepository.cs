@@ -19,7 +19,7 @@ namespace BookStore.Models.Repositories
         }
         public void Add(Author entity)
         {
-            entity.Id = authors.Max(a => a.Id) + 1;
+           // entity.Id = authors.Max(a => a.Id) + 1;
             authors.Add(entity);
         }
 
@@ -38,6 +38,11 @@ namespace BookStore.Models.Repositories
         public IList<Author> List()
         {
             return authors;
+        }
+
+        public List<Author> Search(string term)
+        {
+            return authors.Where(b => b.FullName.Contains(term)).ToList();
         }
 
         public void Udpate(int id, Author newAuthor)

@@ -17,18 +17,29 @@ namespace BookStore.Models.Repositories
                 // book 1
                 new Book
                 {
-                   Id=1, Title="C# Programming" ,  Description="C# Descritpion" ,
-                    Author = new Author{ Id = 2}
+                   Id=1,
+                   Title="C# Programming" ,
+                   Description="C# Descritpion" ,
+                   ImageUrl="img1.jpg",
+                   Author = new Author{ Id = 2}
                 },
                 // book 2
                 new Book
                 {
-                   Id=2, Title="Java Programming" ,  Description="Java Descritpion" , Author = new Author()
+                   Id=2, 
+                   Title="Java Programming" ,  
+                   Description="Java Descritpion" ,
+                   ImageUrl="img2.jpg",
+                   Author = new Author()
                 },
                 // book 3
                 new Book
                 {
-                   Id=3, Title="Python Programming" ,  Description="Python Descritpion" , Author = new Author()
+                   Id=3, 
+                   Title="Python Programming" ,  
+                   Description="Python Descritpion" ,
+                   ImageUrl="img3.jpg",
+                   Author = new Author()
                 }
             };
         }
@@ -60,6 +71,11 @@ namespace BookStore.Models.Repositories
             return books;
         }
 
+        public List<Book> Search(string term)
+        {
+            return books.Where(b => b.Title.Contains(term)).ToList();
+        }
+
         // to Edit or update book
         public void Udpate(int id ,Book newBook)
         {
@@ -68,6 +84,7 @@ namespace BookStore.Models.Repositories
             bookFound.Title = newBook.Title;
             bookFound.Description = newBook.Description;
             bookFound.Author = newBook.Author;
+            bookFound.ImageUrl = newBook.ImageUrl;
         }
     }
 }

@@ -16,5 +16,7 @@ namespace BookStore.Models.Repositories
         void Udpate(int id ,TEntity entity);
 
         void Delete(int id);
+
+        List<TEntity> Search(string term);
     }
 }

@@ -60,15 +60,9 @@ namespace BookStore.Controllers
             {
                 try
                 {
-                    string fileName = string.Empty;
-                    if(model.File != null)
-                    {
-                        string uploads = Path.Combine(hosting.WebRootPath, "uploads");
-                        fileName = model.File.FileName;
-                        string FullPath = Path.Combine(uploads, fileName);
-
-                        model.File.CopyTo(new FileStream(FullPath, FileMode.Create));   // to save the file
-                    }
+                                                      // coalesce operator
+                    string fileName = UploadFile(model.File) ?? string.Empty;
+                  
                     if (model.AuthorId == -1)
                     {
                         // dynamic property for disaly a message in it's(action) view
@@ -113,7 +107,8 @@ namespace BookStore.Controllers
                 Title = book.Title,
                 Discription = book.Description,
                 AuthorId = authorId,
-                Authors = authorRepository.List().ToList()
+                Authors = authorRepository.List().ToList(),
+                ImageUrl = book.ImageUrl
             };
             return View(viewModel);
         }
@@ -126,18 +121,23 @@ namespace BookStore.Controllers
             try
             {
                 // update logic coode
+                string fileName = UploadFile(viewModel.File, viewModel.ImageUrl);
+                    
                 var author = authorRepository.Find(viewModel.AuthorId);
                 var book = new Book
                 {
+                    Id = viewModel.BookId,
                     Title = viewModel.Title,
                     Description = viewModel.Discription,
-                    Author =  author
+                    Author =  author,
+                    ImageUrl = fileName,
+                    
                 };
                 bookRepository.Udpate(viewModel.BookId, book);
 
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
                 return View();
             }
@@ -184,6 +184,52 @@ namespace BookStore.Controllers
                 Authors = FillSelectList()
             };
             return vmodel;
+        }
+
+
+        // method to save the file
+        string UploadFile(IFormFile file)
+        {
+            if (file != null)
+            {
+                string uploads = Path.Combine(hosting.WebRootPath, "uploads");
+                string FullPath = Path.Combine(uploads, file.FileName);
+
+                file.CopyTo(new FileStream(FullPath, FileMode.Create));   // to save the file
+
+                return file.FileName;
+            }
+            return null;
+        }
+
+        // overload uloadFile method
+        string UploadFile(IFormFile file , string imageUrl)
+        {
+            if (file != null)
+            {
+                string uploads = Path.Combine(hosting.WebRootPath, "uploads");
+
+                string newPath = Path.Combine(uploads, file.FileName);
+                string oldPath = Path.Combine(uploads, imageUrl);
+
+                // check if the image was changed so delete the old and save the new otherwise do nothing
+                if (oldPath != newPath)
+                {
+                    System.IO.File.Delete(oldPath);
+
+                    file.CopyTo(new FileStream(newPath, FileMode.Create));   // to save the file
+
+                }
+                return file.FileName;
+            }
+            return imageUrl;
+        }
+
+        public ActionResult Search(string term)
+        {
+            var result = bookRepository.Search(term);
+
+            return View("Index" , result);
         }
     }
 }

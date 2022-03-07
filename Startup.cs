@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +17,11 @@ namespace BookStore
 {
     public class Startup
     {
+        private readonly IConfiguration configuration;
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            this.configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
@@ -27,10 +31,12 @@ namespace BookStore
         {
             services.AddMvc( option => option.EnableEndpointRouting = false ); // depencies
 
-            services.AddSingleton<IBookStoreRepository<Author>, AuthorRepository>();
-            services.AddSingleton<IBookStoreRepository<Book>, BookRepository>();
-
-
+            services.AddScoped<IBookStoreRepository<Author>, AuthorDbRepository>();
+            services.AddScoped<IBookStoreRepository<Book>, BookDbRepository>();
+            services.AddDbContext<BookStoreDBContext>(options =>
+           {
+               options.UseSqlServer(configuration.GetConnectionString("SqlCon"));
+           });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,14 +46,17 @@ namespace BookStore
             {
                 app.UseDeveloperExceptionPage();
             }
+
  
-           
             app.UseStaticFiles(); // to use static files like bootstrap , css ...etc
-             app.UseMvcWithDefaultRoute();
-          ///  app.UseMvc();
-
-
+                                  //  app.UseMvcWithDefaultRoute();
+            app.UseMvc(route =>
+            {
+                route.MapRoute("defult", "{controller=Book}/{action=Index}/{id?}");
+            });
            
+
+
         }
     }
 }
